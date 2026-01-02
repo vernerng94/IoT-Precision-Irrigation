@@ -1,0 +1,13 @@
+
+## 🔗 Useful Links
+- [Arduino IDE Download](https://www.arduino.cc/en/software)
+- [ThingSpeak Documentation](https://www.mathworks.com/help/thingspeak/)
+- [ESP32 Pinout Reference](https://randomnerdtutorials.com/esp32-pinout-reference-gpios/)
+
+## 📝 Notes
+- Calibrate soil moisture sensor values for your specific soil type
+- Adjust the 25% threshold based on plant requirements
+- Ensure proper waterproofing for outdoor deployment
+
+---
+*For academic purposes - IoT Coursework Project*
