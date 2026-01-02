@@ -1,0 +1,52 @@
+# 🔌 Wiring Diagram & Connections
+
+## ESP32 Pin Configuration
+
+| ESP32 Pin | Component | Connection Type | Notes |
+|-----------|-----------|----------------|-------|
+| **GPIO 34** | Soil Moisture Sensor | Analog Input | Capacitive sensor analog output |
+| **GPIO 4** | DHT22 Sensor | Digital I/O | Data pin (pull-up resistor recommended) |
+| **GPIO 23** | Relay Module | Digital Output | Controls water pump/solenoid valve |
+| **3.3V** | DHT22, Soil Sensor | Power | 3.3V power supply |
+| **5V** | Relay Module | Power | 5V required for relay coil |
+| **GND** | All Components | Ground | Common ground connection |
+
+## Schematic Overview
+
+```
+       ESP32 Dev Board
+    ┌─────────────────┐
+    │                 │
+    │  GPIO34 ────────┼───▶ Soil Moisture (A0)
+    │                 │
+    │  GPIO4  ────────┼───▶ DHT22 (Data)
+    │                 │
+    │  GPIO23 ────────┼───▶ Relay IN
+    │                 │
+    │  3.3V   ────────┼───▶ Sensors VCC
+    │                 │
+    │  5V     ────────┼───▶ Relay VCC
+    │                 │
+    │  GND    ────────┼───▶ All GND pins
+    └─────────────────┘
+```
+
+## Power Considerations
+
+- **ESP32:** USB powered (5V) or external 5V supply
+- **Sensors:** 3.3V from ESP32 3.3V regulator
+- **Relay:** Requires 5V for coil activation
+- **Water Pump:** Powered separately via relay contacts
+
+## Safety Notes
+
+1. **Isolation:** Relay provides electrical isolation between ESP32 and pump
+2. **Waterproofing:** Seal all outdoor electrical connections
+3. **Power:** Ensure adequate current for pump (relay rated for pump current)
+4. **Grounding:** Single common ground point recommended
+
+## Visual Reference
+
+*(Add Fritzing diagram or photo here when available)*
+
+> **Tip:** Use a breadboard for prototyping, then move to PCB or perfboard for final installation.
