@@ -1,0 +1,147 @@
+// IoT Precision Irrigation System - ESP32
+// CU Index: 15999038 / 705W5GSG
+// Module: PSB602IT Internet of Things
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <DHT.h>
+
+// WiFi credentials
+const char* ssid = "Your_WiFi_SSID";
+const char* password = "Your_WiFi_Password";
+
+// ThingSpeak settings
+const char* server = "api.thingspeak.com";
+String apiKey = "YOUR_THINGSPEAK_API_KEY";
+
+// Sensor pins (ESP32)
+#define SOIL_MOISTURE_PIN 34  // Analog pin for soil moisture sensor
+#define DHT_PIN 4            // Digital pin for DHT22
+#define RELAY_PIN 23         // Control relay for water pump/valve
+
+DHT dht(DHT_PIN, DHT22);  // Initialize DHT22 sensor
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  
+  // Initialize pins
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);  // Start with relay OFF (no irrigation)
+  
+  // Connect to WiFi
+  Serial.println();
+  Serial.println("=====================================");
+  Serial.println("IoT Precision Irrigation System");
+  Serial.println("Initializing...");
+  Serial.println("=====================================");
+  
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi: ");
+  Serial.println(ssid);
+  
+  int wifiTimeout = 0;
+  while (WiFi.status() != WL_CONNECTED && wifiTimeout < 20) {
+    delay(500);
+    Serial.print(".");
+    wifiTimeout++;
+  }
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\n✅ WiFi Connected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\n❌ WiFi Connection Failed!");
+  }
+  
+  // Start DHT sensor
+  dht.begin();
+  delay(2000);
+  
+  Serial.println("✅ System initialized successfully");
+  Serial.println("=====================================");
+}
+
+void loop() {
+  // 1. Read soil moisture
+  int soilRaw = analogRead(SOIL_MOISTURE_PIN);
+  // Convert to percentage (adjust calibration values for your sensor)
+  int moisturePercent = map(soilRaw, 4095, 1500, 0, 100);
+  moisturePercent = constrain(moisturePercent, 0, 100);
+  
+  // 2. Read temperature and humidity
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+  
+  // Check if DHT readings failed
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("⚠️ Failed to read from DHT sensor!");
+    temperature = 0;
+    humidity = 0;
+  }
+  
+  // 3. Display readings
+  Serial.println();
+  Serial.println("📊 SENSOR READINGS:");
+  Serial.print("   Soil Moisture: ");
+  Serial.print(moisturePercent);
+  Serial.println("%");
+  Serial.print("   Temperature: ");
+  Serial.print(temperature);
+  Serial.println("°C");
+  Serial.print("   Humidity: ");
+  Serial.print(humidity);
+  Serial.println("%");
+  
+  // 4. Send to ThingSpeak if WiFi is connected
+  if (WiFi.status() == WL_CONNECTED) {
+    sendToThingSpeak(moisturePercent, temperature, humidity);
+  } else {
+    Serial.println("⚠️ WiFi disconnected!");
+    // Attempt to reconnect
+    WiFi.begin(ssid, password);
+  }
+  
+  // 5. Control irrigation based on soil moisture
+  controlIrrigation(moisturePercent);
+  
+  // Wait before next reading
+  Serial.println("⏳ Waiting 15 seconds for next reading...");
+  Serial.println("-------------------------------------");
+  delay(15000);  // 15 seconds
+}
+
+void sendToThingSpeak(int moisture, float temp, float humidity) {
+  HTTPClient http;
+  
+  // Build ThingSpeak URL
+  String url = "http://" + String(server) + "/update?api_key=" + apiKey;
+  url += "&field1=" + String(moisture);    // Soil moisture
+  url += "&field2=" + String(temp);        // Temperature
+  url += "&field3=" + String(humidity);    // Humidity
+  
+  http.begin(url);
+  int httpCode = http.GET();
+  
+  if (httpCode > 0) {
+    Serial.print("✅ Data sent to ThingSpeak. HTTP Code: ");
+    Serial.println(httpCode);
+  } else {
+    Serial.print("❌ Error sending data. HTTP Code: ");
+    Serial.println(httpCode);
+  }
+  
+  http.end();
+}
+
+void controlIrrigation(int moisture) {
+  // Irrigation logic based on your 25% threshold
+  if (moisture < 25) {
+    digitalWrite(RELAY_PIN, HIGH);
+    Serial.println("💧 IRRIGATION: ON (Soil too dry)");
+  } else {
+    digitalWrite(RELAY_PIN, LOW);
+    Serial.println("💧 IRRIGATION: OFF (Soil moisture OK)");
+  }
+}
