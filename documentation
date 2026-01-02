@@ -8,6 +8,7 @@
 - Calibrate soil moisture sensor values for your specific soil type
 - Adjust the 25% threshold based on plant requirements
 - Ensure proper waterproofing for outdoor deployment
+- Replace placeholder WiFi credentials and API key before use
 
 ---
 *For academic purposes - IoT Coursework Project*
