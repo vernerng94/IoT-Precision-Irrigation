@@ -7,6 +7,7 @@ An ESP32-based smart irrigation system that monitors soil moisture, temperature,
 - **Student:** CU Index: 15999038 / 705W5GSG
 - **Hardware:** ESP32, DHT22, Soil Moisture Sensor, Relay Module
 - **Cloud:** ThingSpeak for data visualization and control
+- **Threshold:** Automatic irrigation when soil moisture < 25%
 
 ## 🛠️ Hardware Components
 1. ESP32 Development Board
@@ -50,5 +51,6 @@ An ESP32-based smart irrigation system that monitors soil moisture, temperature,
 - Temperature and humidity tracking
 - Data logging to ThingSpeak
 - Remote monitoring capability
+- Serial console debugging
 
 ## 📁 Repository Structure
